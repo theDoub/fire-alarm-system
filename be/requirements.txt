@@ -1,0 +1,48 @@
+# Web Framework
+fastapi==0.104.1
+uvicorn==0.24.0
+pydantic==2.4.2
+pydantic-settings==2.0.3
+
+# Database
+sqlalchemy==2.0.23
+alembic==1.12.1
+psycopg2-binary==2.9.9
+python-dotenv==1.0.0
+
+# MQTT
+paho-mqtt==1.7.1
+
+# Authentication & Security
+python-jose==3.3.0
+passlib==1.7.4
+python-multipart==0.0.6
+pytz==2023.3
+
+# Email
+aiosmtplib==3.0.1
+email-validator==2.1.0
+
+# Logging
+python-json-logger==2.0.7
+
+# Testing
+pytest==7.4.3
+pytest-cov==4.1.0
+pytest-asyncio==0.21.1
+httpx==0.25.1
+
+# Code Quality
+black==23.11.0
+flake8==6.1.0
+mypy==1.7.0
+pylint==3.0.3
+
+# Development
+ipython==8.17.2
+ipdb==0.13.13
+
+# Utilities
+requests==2.31.0
+celery==5.3.4
+redis==5.0.0

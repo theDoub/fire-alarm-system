@@ -1,0 +1,55 @@
+{
+  "name": "fire-alarm-mobile",
+  "version": "1.0.0",
+  "description": "Mobile app for Fire Alarm Monitoring System",
+  "main": "index.js",
+  "scripts": {
+    "android": "react-native run-android",
+    "ios": "react-native run-ios",
+    "web": "expo start --web",
+    "start": "react-native start",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint src --ext .ts,.tsx,.js,.jsx",
+    "format": "prettier --write src"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-native": "^0.72.0",
+    "expo": "^49.0.0",
+    "@react-navigation/native": "^6.1.0",
+    "@react-navigation/bottom-tabs": "^6.5.0",
+    "@react-navigation/stack": "^6.3.0",
+    "react-native-screens": "^3.26.0",
+    "react-native-safe-area-context": "^4.7.0",
+    "zustand": "^4.4.0",
+    "@react-query/native": "^3.39.0",
+    "axios": "^1.6.0",
+    "paho-mqtt": "^1.1.2",
+    "react-native-mqtt": "^0.1.1",
+    "react-native-chart-kit": "^6.12.0",
+    "react-native-svg": "^13.10.0",
+    "react-native-svg-charts": "^5.4.0",
+    "react-native-gesture-handler": "^2.13.0",
+    "react-native-reanimated": "^3.5.0",
+    "native-base": "^3.4.0",
+    "@react-native-async-storage/async-storage": "^1.19.0",
+    "@react-native-community/netinfo": "^10.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-native": "^0.72.0",
+    "typescript": "^5.3.0",
+    "@types/jest": "^29.5.0",
+    "jest": "^29.7.0",
+    "@testing-library/react-native": "^12.0.0",
+    "eslint": "^8.55.0",
+    "prettier": "^3.1.0",
+    "babel-preset-expo": "^9.5.0",
+    "@babel/core": "^7.23.0"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  }
+}

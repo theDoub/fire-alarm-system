@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: fire_alarm_db
+    environment:
+      POSTGRES_USER: ${DB_USER:-fire_alarm}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+      POSTGRES_DB: ${DB_NAME:-fire_alarm_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - fire_alarm_network
+
+  mqtt:
+    image: eclipse-mosquitto:latest
+    container_name: fire_alarm_mqtt
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./mqtt/config:/mosquitto/config
+      - ./mqtt/data:/mosquitto/data
+      - ./mqtt/logs:/mosquitto/log
+    networks:
+      - fire_alarm_network
+
+  api:
+    build: .
+    container_name: fire_alarm_api
+    command: python src/main.py
+    environment:
+      DATABASE_URL: postgresql://${DB_USER:-fire_alarm}:${DB_PASSWORD:-password}@db:5432/${DB_NAME:-fire_alarm_db}
+      MQTT_BROKER: mqtt
+      MQTT_PORT: 1883
+      API_HOST: 0.0.0.0
+      API_PORT: 8000
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - mqtt
+    volumes:
+      - .:/app
+    networks:
+      - fire_alarm_network
+
+volumes:
+  postgres_data:
+
+networks:
+  fire_alarm_network:
+    driver: bridge
