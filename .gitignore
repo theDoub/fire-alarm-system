@@ -1,0 +1,24 @@
+# Local environment files
+.env
+.env.*
+!.env.example
+
+# Java / Maven
+target/
+*.class
+
+# Logs
+logs/
+*.log
+
+# Node / React Native
+node_modules/
+.expo/
+dist/
+build/
+
+# IDE / OS
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
