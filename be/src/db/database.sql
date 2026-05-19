@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS infos (
 CREATE TABLE IF NOT EXISTS alerts(
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     device_id UUID NOT NULL,
-    info_id UUID NOT NULL,
+    info_id UUID NOT NULL UNIQUE,
     level VARCHAR(10) NOT NULL,
     title VARCHAR(255) NOT NULL,
     message TEXT,
@@ -100,7 +100,7 @@ CREATE TABLE IF NOT EXISTS alert_suppressions (
     end_time TIMESTAMPTZ NOT NULL,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_alert_suppresion_user
+    CONSTRAINT fk_alert_suppression_user
         FOREIGN KEY (user_id)
         REFERENCES users(id)
         ON DELETE CASCADE,
