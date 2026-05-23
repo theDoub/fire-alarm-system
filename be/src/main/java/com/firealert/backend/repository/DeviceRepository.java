@@ -38,4 +38,6 @@ public interface DeviceRepository extends JpaRepository<Device, UUID> {
     List<Device> findByUser_idAndStatus(DeviceStatus status);
 
     List<Device> findByUser_idAndIsEnable(Boolean isEnable);
+
+    Boolean existsBySerialNum(String serialNum);
 }

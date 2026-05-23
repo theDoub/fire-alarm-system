@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.firealert.backend.model.entities.AlertSuppression;
 
-public interface AlertSuppresionRepository extends JpaRepository<AlertSuppression, UUID> {
+public interface AlertSuppressionRepository extends JpaRepository<AlertSuppression, UUID> {
 
     Optional<AlertSuppression> findByIdAndDevice_User_Id(UUID id, UUID userId);
 

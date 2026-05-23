@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.firealert.backend.dto.AuthResponse;
 import com.firealert.backend.dto.LoginRequest;
 import com.firealert.backend.dto.UserRegistrationRequest;
+import com.firealert.backend.dto.UserResponse;
 import com.firealert.backend.security.CustomUserDetails;
 import com.firealert.backend.service.AuthService;
 
@@ -37,7 +38,7 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<AuthResponse> me (@AuthenticationPrincipal CustomUserDetails currentUser){
+    public ResponseEntity<UserResponse> me (@AuthenticationPrincipal CustomUserDetails currentUser){
         return ResponseEntity.ok(authService.getCurrentUser(currentUser));
     }
 

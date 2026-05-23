@@ -1,6 +1,6 @@
 package com.firealert.backend.service;
 
-import com.firealert.backend.dto.DeviceRequest;
+import com.firealert.backend.dto.DeviceCreateRequest;
 import com.firealert.backend.model.Device;
 import com.firealert.backend.repository.DeviceRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,12 +28,12 @@ public class DeviceServiceTest {
     @InjectMocks
     private DeviceService deviceService;
     
-    private DeviceRequest deviceRequest;
+    private DeviceCreateRequest deviceRequest;
     private Device mockDevice;
     
     @BeforeEach
     void setUp() {
-        deviceRequest = DeviceRequest.builder()
+        deviceRequest = DeviceCreateRequest.builder()
                 .deviceName("Living Room Detector")
                 .build();
         

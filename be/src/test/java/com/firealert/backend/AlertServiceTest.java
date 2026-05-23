@@ -1,6 +1,6 @@
 package com.firealert.backend.service;
 
-import com.firealert.backend.dto.AlertRequest;
+import com.firealert.backend.dto.AlertCreateRequest;
 import com.firealert.backend.model.Alert;
 import com.firealert.backend.repository.AlertRepository;
 import com.firealert.backend.repository.AlertHistoryRepository;
@@ -36,12 +36,12 @@ public class AlertServiceTest {
     @InjectMocks
     private AlertService alertService;
     
-    private AlertRequest alertRequest;
+    private AlertCreateRequest alertRequest;
     private Alert mockAlert;
     
     @BeforeEach
     void setUp() {
-        alertRequest = AlertRequest.builder()
+        alertRequest = AlertCreateRequest.builder()
                 .deviceId(1)
                 .alertLevel("HIGH")
                 .sensorValue(85.0)

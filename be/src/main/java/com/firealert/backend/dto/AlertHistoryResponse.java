@@ -1,24 +1,24 @@
 package com.firealert.backend.dto;
 
+import java.time.OffsetDateTime;
+import java.util.UUID;
+
 import com.firealert.backend.model.enums.AlertStatus;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * DTO for updating alert status (clear or disable)
- */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AlertStatusUpdateRequest {
-    
-    @NotNull(message = "Status is required")
-    private AlertStatus status; // ACTIVE, CLEARED, DISABLED
-
+public class AlertHistoryResponse {
+    private UUID id;
+    private UUID alertId;
+    private AlertStatus oldStatus;
+    private AlertStatus newStatus;
     private String note;
+    private OffsetDateTime createdAt;
 }

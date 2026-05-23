@@ -36,11 +36,13 @@ public interface AlertRepository extends JpaRepository<Alert, UUID> {
             OffsetDateTime startTime,
             OffsetDateTime endTime
     );
+
+    Boolean existsByInfo_Id(UUID infoId);
     
     /**
      * Find active alerts for a device
      */
-    List<Alert> findByDevice_IdAndStatusOrderByCreatedAtDesc(UUID deviceId, String status);
+    List<Alert> findByDevice_IdAndStatusOrderByCreatedAtDesc(UUID deviceId, AlertStatus status);
 
     /**
      * Find info matchs with alert

@@ -1,82 +1,60 @@
 package com.firealert.backend.service;
 
-import com.firealert.backend.dto.UserRegistrationRequest;
-import com.firealert.backend.dto.UserResponse;
-import com.firealert.backend.model.User;
-import com.firealert.backend.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Optional;
+
+import com.firealert.backend.dto.UserResponse;
+import com.firealert.backend.dto.UserUpdateRequest;
+import com.firealert.backend.model.entities.User;
+import com.firealert.backend.repository.UserRepository;
 
 /**
  * Service for User management
  * Handles user registration, authentication, and profile management
  */
 @Service
-@RequiredArgsConstructor
-@Slf4j
-@Transactional
 public class UserService {
-    
     private final UserRepository userRepository;
-    private static final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-    
-    /**
-     * Register a new user
-     */
-    public UserResponse registerUser(UserRegistrationRequest request) {
-        log.info("Registering new user with email: {}", request.getEmail());
-        
-        if (userRepository.existsByEmail(request.getEmail())) {
-            log.warn("Email already exists: {}", request.getEmail());
-            throw new RuntimeException("Email already registered");
+
+    public UserService(UserRepository userRepository){
+        this.userRepository = userRepository;
+    }
+
+    @Transactional(readOnly = true)
+    public UserResponse getCurrentUser(UUID userId){
+        User user = getUserOrThrow(userId);
+        return toResponse(user);
+    }
+
+    @Transactional
+    public UserResponse updateCurrentUser(UUID userId, UserUpdateRequest request){
+        User user = getUserOrThrow(userId);
+
+        if (request.getFullName() != null && !request.getFullName().isBlank()){
+            user.setFullName(request.getFullName().trim());
         }
-        
-        User user = User.builder()
-                .email(request.getEmail())
-                .passwordHash(passwordEncoder.encode(request.getPassword()))
-                .fullName(request.getFullName())
-                .build();
-        
-        User savedUser = userRepository.save(user);
-        log.info("User registered successfully with ID: {}", savedUser.getUserId());
-        
-        return mapToResponse(savedUser);
+
+        if (request.getPhone() != null){
+            String phone = request.getPhone().trim();
+            user.setPhone(phone.isBlank() ? null : phone);
+        }
+        return toResponse(userRepository.save(user));
     }
-    
-    /**
-     * Get user by ID
-     */
-    public UserResponse getUserById(Integer userId) {
-        log.debug("Fetching user by ID: {}", userId);
-        
+
+    private User getUserOrThrow(UUID userId){
         return userRepository.findById(userId)
-                .map(this::mapToResponse)
-                .orElseThrow(() -> {
-                    log.error("User not found: {}", userId);
-                    return new RuntimeException("User not found");
-                });
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
     }
-    
-    /**
-     * Get user by email
-     */
-    public Optional<UserResponse> getUserByEmail(String email) {
-        log.debug("Fetching user by email: {}", email);
-        return userRepository.findByEmail(email).map(this::mapToResponse);
-    }
-    
-    /**
-     * Map User entity to UserResponse DTO
-     */
-    private UserResponse mapToResponse(User user) {
+
+    private UserResponse toResponse(User user){
         return UserResponse.builder()
-                .userId(user.getUserId())
+                .userId(user.getId())
                 .email(user.getEmail())
                 .fullName(user.getFullName())
+                .phone(user.getPhone())
+                .role(user.getRole())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
                 .build();

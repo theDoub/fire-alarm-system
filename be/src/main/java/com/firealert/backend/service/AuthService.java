@@ -44,6 +44,9 @@ public class AuthService {
         user.setEmail(request.getEmail().trim().toLowerCase());
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         user.setFullName(request.getFullName().trim());
+        if (request.getPhone() != null && !request.getPhone().isBlank()){
+            user.setPhone(request.getPhone().trim());
+        }
 
         User savedUser = userRepository.save(user);
         CustomUserDetails userDetails = new CustomUserDetails(savedUser);
@@ -51,7 +54,7 @@ public class AuthService {
 
         return AuthResponse.builder()
                 .accessToken(token)
-                .tokenType("Bearer ")
+                .tokenType("Bearer")
                 .user(toUserResponse(savedUser))
                 .build();
     }
@@ -70,7 +73,7 @@ public class AuthService {
         String token = jwtTokenProvider.generateToken(userDetails);
         return AuthResponse.builder()
                 .accessToken(token)
-                .tokenType("Bearer ")
+                .tokenType("Bearer")
                 .user(toUserResponse(user))
                 .build();
     }

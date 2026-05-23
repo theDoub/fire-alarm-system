@@ -1,15 +1,20 @@
 package com.firealert.backend.controller;
 
-import com.firealert.backend.dto.ApiResponse;
-import com.firealert.backend.dto.UserRegistrationRequest;
-import com.firealert.backend.dto.UserResponse;
-import com.firealert.backend.service.UserService;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.firealert.backend.dto.UserResponse;
+import com.firealert.backend.dto.UserUpdateRequest;
+import com.firealert.backend.model.entities.User;
+import com.firealert.backend.security.CustomUserDetails;
+import com.firealert.backend.service.UserService;
+
+import jakarta.validation.Valid;
 
 /**
  * REST Controller for User management
@@ -17,56 +22,27 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/users")
-@RequiredArgsConstructor
-@Slf4j
 public class UserController {
     
     private final UserService userService;
     
-    /**
-     * Register a new user
-     * POST /api/users/register
-     */
-    @PostMapping("/register")
-    public ResponseEntity<ApiResponse<UserResponse>> registerUser(
-            @Valid @RequestBody UserRegistrationRequest request) {
-        log.info("Registering new user: {}", request.getEmail());
-        
-        try {
-            UserResponse response = userService.registerUser(request);
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(ApiResponse.success("User registered successfully", response, 201));
-        } catch (Exception e) {
-            log.error("Error registering user: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(ApiResponse.error(e.getMessage(), 400));
-        }
+    public UserController(UserService userService){
+        this.userService = userService;
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserResponse> getCurrentUser(
+        @AuthenticationPrincipal CustomUserDetails currentUser
+    ) {
+        return ResponseEntity.ok(userService.getCurrentUser(currentUser.getId()));
+    }
+
+    @PutMapping("/me")
+    public ResponseEntity<UserResponse> updateCurrentUser(
+        @AuthenticationPrincipal CustomUserDetails currentUser,
+        @Valid @RequestBody UserUpdateRequest request
+    ) {
+        return ResponseEntity.ok(userService.updateCurrentUser(currentUser.getId(), request));
     }
     
-    /**
-     * Get user by ID
-     * GET /api/users/{userId}
-     */
-    @GetMapping("/{userId}")
-    public ResponseEntity<ApiResponse<UserResponse>> getUserById(@PathVariable Integer userId) {
-        log.info("Fetching user: {}", userId);
-        
-        try {
-            UserResponse response = userService.getUserById(userId);
-            return ResponseEntity.ok(ApiResponse.success("User retrieved successfully", response, 200));
-        } catch (Exception e) {
-            log.error("Error fetching user: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.error(e.getMessage(), 404));
-        }
-    }
-    
-    /**
-     * Health check endpoint
-     * GET /api/users/health
-     */
-    @GetMapping("/health")
-    public ResponseEntity<ApiResponse<String>> health() {
-        return ResponseEntity.ok(ApiResponse.success("User service is healthy", "OK", 200));
-    }
 }
