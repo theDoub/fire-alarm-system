@@ -17,7 +17,7 @@ public interface InfoRepository extends JpaRepository<Info, UUID> {
 
     List<Info> findByDevice_IdOrderByRecordedAtDesc(UUID deviceId);
 
-    Optional<Info> findfirstByDevice_IdOrderByRecordedAtDesc(UUID deviceId);
+    Optional<Info> findFirstByDevice_IdOrderByRecordedAtDesc(UUID deviceId);
     
     List<Info> findByDevice_IdAndRecordedAtBetweenOrderByRecordedAtDesc(
         UUID deviceId,

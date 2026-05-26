@@ -39,7 +39,7 @@ public class DeviceService {
     public List<DeviceResponse> getMyDevices(UUID userId, DeviceStatus status){
         List<Device> devices = status == null 
             ? deviceRepository.findByUser_Id(userId) 
-            : deviceRepository.findByUser_idAndStatus(status);
+            : deviceRepository.findByUser_IdAndStatus(userId, status);
         return devices.stream().map(this::toResponse).toList();
     }
     

@@ -82,7 +82,7 @@ public class AlertSuppressionService {
         suppression.setIsActive(false);
         suppression.setEndTime(now);
 
-        AlertSuppression savedSuppression = alertSuppresionRepository.save(suppression);
+        AlertSuppression savedSuppression = alertSuppressionRepository.save(suppression);
         resolveSuppressedAlertsForDevice(
                 savedSuppression.getDevice().getId(),
                 "Suppression deactivated, suppressed alerts resolved"

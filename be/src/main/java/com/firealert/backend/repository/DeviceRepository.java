@@ -35,9 +35,9 @@ public interface DeviceRepository extends JpaRepository<Device, UUID> {
 
     long countByUser_IdAndIsEnable(UUID userId, Boolean isEnable);
 
-    List<Device> findByUser_idAndStatus(DeviceStatus status);
+    List<Device> findByUser_IdAndStatus(UUID userId, DeviceStatus status);
 
-    List<Device> findByUser_idAndIsEnable(Boolean isEnable);
+    List<Device> findByUser_IdAndIsEnable(UUID userId, Boolean isEnable);
 
     Boolean existsBySerialNum(String serialNum);
 }

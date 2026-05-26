@@ -26,7 +26,7 @@ import jakarta.validation.Valid;
 import jakarta.websocket.server.PathParam;
 
 @RestController
-@@RequestMapping("/devices/{deviceId}/infos")
+@RequestMapping("/devices/{deviceId}/infos")
 public class InfoController {
     private final InfoService infoService;
 
