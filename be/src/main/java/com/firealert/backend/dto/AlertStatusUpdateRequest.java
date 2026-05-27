@@ -1,5 +1,7 @@
 package com.firealert.backend.dto;
 
+import com.firealert.backend.model.enums.AlertStatus;
+
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,5 +18,7 @@ import lombok.NoArgsConstructor;
 public class AlertStatusUpdateRequest {
     
     @NotNull(message = "Status is required")
-    private String status; // ACTIVE, CLEARED, DISABLED
+    private AlertStatus status; // ACTIVE, CLEARED, DISABLED
+
+    private String note;
 }

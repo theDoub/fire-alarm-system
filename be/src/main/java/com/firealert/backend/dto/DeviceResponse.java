@@ -1,10 +1,16 @@
 package com.firealert.backend.dto;
 
+import java.util.UUID;
+
+import com.firealert.backend.model.enums.DeviceStatus;
+
+import java.time.OffsetDateTime;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.time.LocalDateTime;
+
 
 /**
  * DTO for device response
@@ -15,12 +21,14 @@ import java.time.LocalDateTime;
 @Builder
 public class DeviceResponse {
     
-    private Integer deviceId;
-    private Integer userId;
-    private String deviceName;
-    private String status;
-    private Boolean isEnabled;
-    private LocalDateTime lastHeartbeat;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private UUID id;
+    private UUID userId;
+    private String name;
+    private String location;
+    private String serialNum;
+    private DeviceStatus status;
+    private Boolean isEnable;
+    private OffsetDateTime lastSeen;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
 }
