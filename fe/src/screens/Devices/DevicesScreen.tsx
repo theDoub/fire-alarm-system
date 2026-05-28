@@ -10,6 +10,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useDevices } from '@/hooks/useDevices';
 import type { Device } from '@/types/device';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+// NativeStackNavigationProp is correctly from @react-navigation/native-stack
 import type { RootStackParamList } from '@/types/navigation';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;

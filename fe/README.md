@@ -1,76 +1,48 @@
-# 🔥 Smart Fire Alarm System — Mobile App (React Native)
+# 🔥 Smart Fire Alarm — Mobile App
 
-> **Stack:** React Native 0.72 · TypeScript · Expo SDK 49 · React Navigation v6 · Zustand · Axios
+> React Native · TypeScript · Expo SDK 54 · React Navigation v6 · Zustand · Axios
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
 1. [Prerequisites](#prerequisites)
-2. [Environment Setup](#environment-setup)
-3. [Installation](#installation)
-4. [Configuration](#configuration)
-5. [Running the App](#running-the-app)
-6. [Project Structure](#project-structure)
-7. [Git Collaboration Rules](#git-collaboration-rules)
+2. [Installation](#installation)
+3. [Configuration](#configuration)
+4. [Running the App](#running-the-app)
+5. [Project Structure](#project-structure)
+6. [Team Collaboration Rules](#team-collaboration-rules)
 
 ---
 
 ## Prerequisites
 
-Make sure **all** of the following are installed before continuing.
-
-| Tool | Required Version | Download |
+| Tool | Version | Link |
 | :--- | :--- | :--- |
 | Node.js | ≥ 16.0.0 | https://nodejs.org |
 | npm | ≥ 8.0.0 | bundled with Node |
-| Git | any | https://git-scm.com |
-| Java JDK | 17 (for Android build) | https://adoptium.net |
-| Android Studio | latest | https://developer.android.com/studio |
-| Expo Go (phone) | latest | [Play Store](https://play.google.com/store/apps/details?id=host.exp.exponent) / [App Store](https://apps.apple.com/app/expo-go/id982107779) |
+| Expo Go (Android/iOS) | **SDK 54 (Latest)** | Play / App Store |
 
-> **Windows users:** also install [Windows Subsystem for Android](https://learn.microsoft.com/en-us/windows/android/wsa/) or use a physical Android device / emulator from Android Studio.
+### Install Expo Go (SDK 54)
 
----
+The project has been upgraded to **Expo SDK 54**. You can install the standard, latest version of **Expo Go** directly from the official app stores:
 
-## Environment Setup
-
-### 1 — Android Studio (first-time only)
-
-1. Open **Android Studio → SDK Manager**
-2. Install **Android SDK Platform 33** (Android 13) and **Android SDK Build-Tools 33.0.0**
-3. Set the `ANDROID_HOME` environment variable:
-
-```powershell
-# Add to your PowerShell profile or System Environment Variables
-$env:ANDROID_HOME = "$env:LOCALAPPDATA\Android\Sdk"
-$env:Path += ";$env:ANDROID_HOME\platform-tools;$env:ANDROID_HOME\emulator"
-```
-
-4. Create a virtual device: **AVD Manager → Create Virtual Device → Pixel 6 → API 33**
-
-### 2 — Verify your setup
-
-```powershell
-node --version      # should print v16.x.x or higher
-npm --version       # should print 8.x.x or higher
-adb devices         # should list your emulator or physical device
-```
+* **Android**: [Google Play Store](https://play.google.com/store/apps/details?id=host.exp.exponent)
+* **iOS**: [Apple App Store](https://apps.apple.com/app/expo-go/id984029728)
 
 ---
 
 ## Installation
 
-```powershell
-# 1. Clone the monorepo (skip if already cloned)
+```bash
+# 1. Clone the repository (skip if already cloned)
 git clone <repo-url>
-cd "fire-alarm"
 
-# 2. Navigate to the frontend directory
-cd fe
+# 2. Go to the frontend directory
+cd "fire-alarm/fe"
 
-# 3. Install all dependencies
-npm install
+# 3. Install dependencies (requires --legacy-peer-deps due to modern peer resolutions)
+npm install --legacy-peer-deps
 ```
 
 ---
@@ -79,124 +51,162 @@ npm install
 
 ### Set the Backend API URL
 
-Open [`src/api/client.ts`](./src/api/client.ts) and update `BASE_URL` to point to Khang's Spring Boot server:
+Open [`src/api/client.ts`](./src/api/client.ts) and set `BASE_URL` to point to Khang's Spring Boot server:
 
-```typescript
+```ts
 // src/api/client.ts
 export const BASE_URL = 'http://<BACKEND_IP>:8080/api';
 ```
 
-| Scenario | Value to use |
+| Your situation | Value to use |
 | :--- | :--- |
-| Spring Boot running on the **same machine** as the emulator | `http://10.0.2.2:8080/api` |
-| Spring Boot running on **another machine** on the same Wi-Fi | `http://192.168.x.x:8080/api` |
-| Physical device + Spring Boot on your laptop | Use your laptop's **local IP** (run `ipconfig` to find it) |
+| Spring Boot on the same PC, testing on **emulator** | `http://10.0.2.2:8080/api` |
+| Spring Boot on the same PC, testing on **physical phone** | `http://192.168.x.x:8080/api` (your PC's local IP) |
 
-> ⚠️ **Do NOT use `localhost`** on a physical device — it will fail. Always use an IP address.
+> Find your PC's local IP by running `ipconfig` in PowerShell and looking for **IPv4 Address** under your Wi-Fi adapter.
+
+> ⚠️ Never use `http://localhost` on a physical device — it will always fail.
 
 ---
 
 ## Running the App
 
-### Option A — Expo Go (Easiest, Recommended for UI development)
+### Step 1 — Start the Expo server
 
-```powershell
-# Inside the fe/ directory
-npm start
+```bash
+npx expo start --clear
 ```
 
-This launches the **Expo Dev Server**. Then:
-- **Android device/emulator:** Press `a` in the terminal, or scan the QR code with the Expo Go app
-- **iOS device:** Scan the QR code with your Camera app (opens in Expo Go)
+### Step 2 — Connect your phone
 
-### Option B — Android Emulator (React Native CLI)
+Make sure your phone and PC are on the **same Wi-Fi network**, then open **Expo Go (SDK 54)** and:
 
-```powershell
-# Start the Metro bundler
-npm start
+- **Scan the QR code** shown in the terminal, or
+- Tap **"Enter URL manually"** and type `exp://<YOUR_PC_IP>:8081`
 
-# In a NEW terminal — build and deploy to emulator
-npm run android
+### Step 3 — If QR scan doesn't connect
+
+Try tunnel mode — it bypasses all network and firewall issues:
+
+```bash
+npx expo start --tunnel
 ```
 
-> Make sure your emulator is already running in Android Studio before executing `npm run android`.
-
-### Option C — Physical Android Device (USB)
-
-1. Enable **Developer Options** on your phone: *Settings → About Phone → tap Build Number 7 times*
-2. Enable **USB Debugging** inside Developer Options
-3. Plug in via USB and confirm the prompt on your phone
-4. Verify connection: `adb devices` (should show your device)
-5. Run:
-
-```powershell
-npm run android
-```
+Then scan the new QR code it generates.
 
 ---
 
 ## Troubleshooting
 
 <details>
-<summary><strong>Metro bundler stuck or showing module errors</strong></summary>
+<summary><b>"Project is incompatible with this version of Expo Go"</b></summary>
 
-```powershell
-# Clear Metro cache
-npm start -- --reset-cache
+Make sure your Expo Go app is updated to the latest version supporting **SDK 54** from the Google Play Store or Apple App Store.
+</details>
+
+<details>
+<summary><b>App keeps reloading / crash loop</b></summary>
+
+Clear Metro cache and restart:
+```bash
+npx expo start --clear
 ```
 </details>
 
 <details>
-<summary><strong>Android build fails with SDK/license errors</strong></summary>
+<summary><b>"No apps connected" when pressing r</b></summary>
 
+Your phone has disconnected. Re-scan the QR code or re-enter the URL in Expo Go.
+</details>
+
+<details>
+<summary><b>Cannot connect to backend (Network Error)</b></summary>
+
+1. Confirm Spring Boot is running on your PC.
+2. Run `ipconfig` and use your **IPv4 Address** (not `localhost`) in `client.ts`.
+3. Allow port 8080 through Windows Firewall:
 ```powershell
-# Accept all SDK licenses
-$env:ANDROID_HOME\cmdline-tools\latest\bin\sdkmanager --licenses
+New-NetFirewallRule -DisplayName "Spring Boot 8080" -Direction Inbound -Protocol TCP -LocalPort 8080 -Action Allow
 ```
 </details>
 
-<details>
-<summary><strong>App installed but shows blank / red screen</strong></summary>
-
-- Open the terminal running `npm start` and read the error in red.
-- Check that `BASE_URL` in `src/api/client.ts` is reachable from the device.
-- Shake the device (or press `m` in terminal) → **Reload** to retry.
-</details>
-
-<details>
-<summary><strong>Cannot connect to backend (Network Error / ECONNREFUSED)</strong></summary>
-
-1. Confirm Spring Boot is running: open `http://localhost:8080/api/auth/me` in your browser.
-2. Confirm the IP in `client.ts` matches your machine's local IP (`ipconfig` on Windows).
-3. Disable the Windows Firewall for port 8080, or add an inbound rule for it.
-</details>
 
 ---
 
 ## Project Structure
 
-```text
-fe/
-└── src/
-    ├── api/          # HTTP Client Layer — Axios instance + one service file per Spring Boot controller
-    ├── types/        # Pure TypeScript domain type definitions (zero runtime code)
-    ├── contexts/     # Global state — AuthContext (JWT), AlertContext (FCM / Level 3 modal)
-    ├── hooks/        # Data-fetching hooks — useAlerts, useDevices, useAlertHistory, useSuppression
-    ├── navigation/   # RootNavigator, AuthStack, AppStack (Bottom Tabs)
-    ├── screens/      # One folder per mockup page (Login, Home, Devices, Alerts, Profile, …)
-    ├── components/   # Reusable atomic UI widgets (AlertBadge, DeviceStatusChip, LoadingSpinner)
-    ├── services/     # Platform services — FCM push (fcmService), MQTT sensor stream (mqttService)
-    ├── store/        # Zustand stores — alertStore (tab badge unread count)
-    └── utils/        # Pure helpers — alertHelpers, dateHelpers
 ```
-
-For the full architecture reference see [`fe_architecture.md`](../firealarm-docs/) or the [architecture artifact](../../).
+fe/
+├── App.tsx                  ← Root entry point (providers + navigator)
+├── app.json                 ← Expo configuration
+├── babel.config.js          ← Babel + module-resolver (@/* alias)
+├── tsconfig.json            ← TypeScript config (strict, @/* paths)
+├── package.json
+└── src/
+    ├── api/                 ← HTTP layer — one file per Spring Boot controller
+    │   ├── client.ts           Axios instance + JWT interceptor
+    │   ├── endpoints.ts        All backend route constants
+    │   ├── authService.ts      POST /api/auth/login, /register, /logout
+    │   ├── deviceService.ts    GET/POST/PUT/DELETE /api/devices
+    │   ├── alertService.ts     GET /api/alerts
+    │   ├── alertHistoryService.ts  GET /api/alerts/history
+    │   └── suppressionService.ts   POST /api/suppressions (Cooking Mode)
+    │
+    ├── types/               ← TypeScript interfaces (no runtime code)
+    │   ├── auth.ts
+    │   ├── device.ts
+    │   ├── alert.ts
+    │   ├── suppression.ts
+    │   └── navigation.ts
+    │
+    ├── contexts/            ← Global state
+    │   ├── AuthContext.tsx     Session, login, logout
+    │   └── AlertContext.tsx    Live alerts, Level 3 danger modal trigger
+    │
+    ├── hooks/               ← Data-fetching hooks
+    │   ├── useAlerts.ts
+    │   ├── useDevices.ts
+    │   ├── useAlertHistory.ts
+    │   └── useSuppression.ts
+    │
+    ├── navigation/          ← React Navigation setup
+    │   ├── RootNavigator.tsx   Auth ↔ App switch
+    │   ├── AuthStack.tsx       Login screen
+    │   └── AppStack.tsx        Bottom tabs: Home | Devices | Alerts | Profile
+    │
+    ├── screens/             ← One folder per UI mockup
+    │   ├── Login/
+    │   ├── Home/
+    │   ├── Devices/
+    │   ├── DeviceInfo/         Device detail + Cooking Mode toggle
+    │   ├── Alerts/             4-tab severity view (All / Low / Medium / High)
+    │   ├── AlertInfo/          Full-screen Level 3 danger modal
+    │   ├── AlertHistory/       Paginated audit log
+    │   └── Profile/
+    │
+    ├── components/common/   ← Reusable UI widgets
+    │   ├── AlertBadge.tsx
+    │   ├── DeviceStatusChip.tsx
+    │   ├── LoadingSpinner.tsx
+    │   └── ErrorBoundary.tsx
+    │
+    ├── services/            ← Platform services
+    │   ├── fcmService.ts       Firebase push (stubbed — needs dev build)
+    │   └── mqttService.ts      MQTT sensor stream (stubbed)
+    │
+    ├── store/               ← Zustand global stores
+    │   └── alertStore.ts       Active alerts + tab badge count
+    │
+    └── utils/               ← Pure helper functions
+        ├── alertHelpers.ts
+        └── dateHelpers.ts
+```
 
 ---
 
-## Git Collaboration Rules
+## Team Collaboration Rules
 
-To avoid merge conflicts, each engineer owns specific directories:
+### Folder Ownership
 
 | Directory | FE1 (Viet) | FE2 (Phat) |
 | :--- | :---: | :---: |
@@ -206,29 +216,29 @@ To avoid merge conflicts, each engineer owns specific directories:
 | `src/services/` | ✅ Owner | 🔴 Read only |
 | `src/store/` | ✅ Owner | 🔴 Read only |
 | `src/navigation/` | ✅ Owner | 🟡 Joint collab |
-| `src/types/` | ✅ Owner | 🟢 Allowed to edit |
+| `src/types/` | ✅ Owner | 🟢 Can edit |
 | `src/components/common/` | 👁 Reviewer | ✅ Full access |
 | `src/screens/` | 👁 Reviewer | ✅ Full access |
 
-### Workflow
+### Git Workflow
 
-```powershell
-# Always pull before starting work
+```bash
+# Always pull before starting
 git pull origin main
 
-# Work on a feature branch
-git checkout -b fe/<your-name>/<feature-name>
+# Work on your own branch
+git checkout -b fe/<your-name>/<feature>
 
-# Push and open a Pull Request — never commit directly to main
-git push origin fe/<your-name>/<feature-name>
+# Push and open a Pull Request — never push directly to main
+git push origin fe/<your-name>/<feature>
 ```
 
-**FE2 rule:** consume hook outputs only — do not modify hook internals.
+### FE2 Rule — Consume hooks, don't modify them
 
-```typescript
-// ✅ Correct — consume what the hook exposes
+```ts
+// ✅ Correct
 const { devices, toggleCookingMode } = useDevices();
 
-// ❌ Wrong — do not reach into api/ or hooks/ and alter logic
+// ❌ Wrong — do not reach into hooks or api/ internals
 import { deviceService } from '@/api/deviceService';
 ```

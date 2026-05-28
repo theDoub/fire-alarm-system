@@ -1,14 +1,13 @@
 /**
  * navigation/AuthStack.tsx
  * Unauthenticated stack: Login screen only.
- * Matches login-page.png mockup.
  */
 import React from 'react';
-import { createStackNavigator } from '@react-navigation/stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { LoginScreen } from '@/screens/Login/LoginScreen';
 import type { AuthStackParamList } from '@/types/navigation';
 
-const Stack = createStackNavigator<AuthStackParamList>();
+const Stack = createNativeStackNavigator<AuthStackParamList>();
 
 export function AuthStack() {
   return (
