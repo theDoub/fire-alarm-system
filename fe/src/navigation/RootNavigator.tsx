@@ -6,37 +6,35 @@
  */
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useAuth } from '@/contexts/AuthContext';
-import { useAlertContext } from '@/contexts/AlertContext';
 import { AuthStack } from './AuthStack';
 import { AppStack } from './AppStack';
-import type { RootStackParamList } from '@/types/navigation';
-
-// Screens
 import { AlertInfoScreen } from '@/screens/AlertInfo/AlertInfoScreen';
+import { DeviceInfoScreen } from '@/screens/DeviceInfo/DeviceInfoScreen';
+import { AlertHistoryDetailScreen } from '@/screens/AlertHistory/AlertHistoryDetailScreen';
+import type { RootStackParamList } from '@/types/navigation';
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 
-const Root = createStackNavigator<RootStackParamList>();
+const Root = createNativeStackNavigator<RootStackParamList>();
 
 export function RootNavigator() {
   const { isAuthenticated, isLoading } = useAuth();
-  const { incomingDangerAlert } = useAlertContext();
 
-  if (isLoading) return null; // splash / loading gate
+  if (isLoading) return <LoadingSpinner />;
 
   return (
     <NavigationContainer>
       {isAuthenticated ? (
         <Root.Navigator screenOptions={{ headerShown: false }}>
           <Root.Screen name="MainTabs" component={AppStack} />
-          {/* Full-screen danger modal — presented on top of all tabs */}
           <Root.Screen
             name="AlertInfo"
             component={AlertInfoScreen}
             options={{ presentation: 'modal', headerShown: false }}
           />
-          <Root.Screen name="DeviceInfo" component={require('@/screens/DeviceInfo/DeviceInfoScreen').DeviceInfoScreen} />
-          <Root.Screen name="AlertHistoryDetail" component={require('@/screens/AlertHistory/AlertHistoryDetailScreen').AlertHistoryDetailScreen} />
+          <Root.Screen name="DeviceInfo" component={DeviceInfoScreen} />
+          <Root.Screen name="AlertHistoryDetail" component={AlertHistoryDetailScreen} />
         </Root.Navigator>
       ) : (
         <AuthStack />
