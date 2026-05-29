@@ -22,6 +22,6 @@ public class DeviceCreateRequest {
     @Size(max = 255, message = "Location must be at most 255 characters")
     private String location;
 
-    @Size(max = 100, message = "Serial number must be at most 255 characters")
+    @Size(max = 100, message = "Serial number must be at most 100 characters")
     private String serialNum;
 }

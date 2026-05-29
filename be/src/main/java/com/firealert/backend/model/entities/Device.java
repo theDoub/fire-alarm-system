@@ -94,7 +94,7 @@ public class Device {
         this.name = name;
     }
 
-	public String getLocation() {
+    public String getLocation() {
         return location;
     }
 

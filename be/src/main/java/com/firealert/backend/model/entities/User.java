@@ -11,7 +11,7 @@ public class User {
     @Column(name = "id", columnDefinition = "uuid")
     private UUID id;
 
-    @Column(name = "full_name", nullable = false, length =255)
+    @Column(name = "full_name", nullable = false, length = 255)
     private String fullName;
 
     @Column(name = "email", unique = true, nullable = false, length = 255)
