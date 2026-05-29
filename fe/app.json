@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "Smart Fire Alarm",
+    "slug": "smart-fire-alarm-fe",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#0f0f1a"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.hcmut.firealarm"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0f0f1a"
+      },
+      "package": "com.hcmut.firealarm"
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "plugins": [],
+    "extra": {
+      "eas": {
+        "projectId": ""
+      }
+    }
+  }
+}
