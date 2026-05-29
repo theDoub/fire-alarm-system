@@ -1,48 +1,62 @@
 package com.firealert.backend.repository;
 
-import com.firealert.backend.model.Alert;
+import com.firealert.backend.model.entities.Alert;
+import com.firealert.backend.model.enums.AlertLevel;
+import com.firealert.backend.model.enums.AlertStatus;
+
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import java.time.LocalDateTime;
+
+import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Repository for Alert entity
  * Provides CRUD operations and custom queries for alert management
  */
 @Repository
-public interface AlertRepository extends JpaRepository<Alert, Integer> {
+public interface AlertRepository extends JpaRepository<Alert, UUID> {
+
+    Optional<Alert> findByIdAndDevice_User_Id(UUID alertId, UUID userId);
     
     /**
      * Find all alerts for a specific device
      */
-    List<Alert> findByDeviceId(Integer deviceId);
+    List<Alert> findByDevice_IdOrderByCreatedAtDesc(UUID deviceId);
+
+    /**
+     * Find Alerts between a specific period
+     */
+    List<Alert> findByDevice_IdAndCreatedAtBetweenOrderByCreatedAtDesc(
+            UUID deviceId,
+            OffsetDateTime startTime,
+            OffsetDateTime endTime
+    );
+
+    Boolean existsByInfo_Id(UUID infoId);
     
     /**
      * Find active alerts for a device
      */
-    List<Alert> findByDeviceIdAndStatus(Integer deviceId, String status);
-    
+    List<Alert> findByDevice_IdAndStatusOrderByCreatedAtDesc(UUID deviceId, AlertStatus status);
+
     /**
-     * Find alerts within time range
+     * Find info matchs with alert
      */
-    @Query("SELECT a FROM Alert a WHERE a.deviceId = :deviceId AND a.triggeredAt BETWEEN :startTime AND :endTime ORDER BY a.triggeredAt DESC")
-    List<Alert> findAlertsByDeviceAndTimeRange(
-            @Param("deviceId") Integer deviceId,
-            @Param("startTime") LocalDateTime startTime,
-            @Param("endTime") LocalDateTime endTime
-    );
-    
+    Optional<Alert> findByInfo_Id(UUID infoId);
+
     /**
-     * Find recent active alerts
+     * Find all alerts for a specific device
      */
-    @Query(value = "SELECT * FROM alerts WHERE status = :status ORDER BY triggered_at DESC LIMIT 50", nativeQuery = true)
-    List<Alert> findRecentAlerts(@Param("status") String status);
-    
+    List<Alert> findByDevice_IdAndLevelOrderByCreatedAtDesc(UUID deviceId, AlertLevel alertLevel);
+
     /**
-     * Count active alerts for a device
+     * Count number of alert with status on a device
      */
-    long countByDeviceIdAndStatus(Integer deviceId, String status);
+    long countByDevice_IdAndStatus(UUID deviceId, AlertStatus status);
+
+    long countByDevice_IdAndLevel(UUID deviceId, AlertLevel alertLevel);
+
 }

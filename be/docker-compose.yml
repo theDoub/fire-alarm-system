@@ -3,9 +3,9 @@ services:
     image: postgres:15-alpine
     container_name: fire_alarm_db
     environment:
-      POSTGRES_USER: ${DB_USER:-firealert_user}
+      POSTGRES_USER: ${DB_USER:-fire_alarm}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-secure_password_123}
-      POSTGRES_DB: ${DB_NAME:-firealert}
+      POSTGRES_DB: ${DB_NAME:-fire_alarm_db}
     ports:
       - "${DB_PORT:-5432}:5432"
     volumes:
@@ -24,8 +24,8 @@ services:
     environment:
       SERVER_PORT: 8080
       SERVER_SERVLET_CONTEXT_PATH: /api
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${DB_NAME:-firealert}
-      SPRING_DATASOURCE_USERNAME: ${DB_USER:-firealert_user}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/fire_alarm_db
+      SPRING_DATASOURCE_USERNAME: fire_alarm
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-secure_password_123}
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
       SPRING_JPA_HIBERNATE_DDL_AUTO: update

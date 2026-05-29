@@ -1,16 +1,17 @@
 package com.firealert.backend.repository;
 
-import com.firealert.backend.model.User;
+import com.firealert.backend.model.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Repository for User entity
  * Provides CRUD operations and custom queries
  */
 @Repository
-public interface UserRepository extends JpaRepository<User, Integer> {
+public interface UserRepository extends JpaRepository<User, UUID> {
     
     /**
      * Find user by email

@@ -4,7 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.util.UUID;
+
+import com.firealert.backend.model.enums.UserRole;
 
 /**
  * DTO for user response
@@ -15,9 +18,11 @@ import java.time.LocalDateTime;
 @Builder
 public class UserResponse {
     
-    private Integer userId;
+    private UUID userId;
     private String email;
     private String fullName;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private String phone;
+    private UserRole role;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
 }

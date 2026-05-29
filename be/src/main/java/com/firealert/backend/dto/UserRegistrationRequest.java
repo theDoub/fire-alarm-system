@@ -28,4 +28,6 @@ public class UserRegistrationRequest {
     @NotBlank(message = "Full name is required")
     @Size(min = 2, max = 255, message = "Full name must be between 2 and 255 characters")
     private String fullName;
+
+    private String phone;
 }
