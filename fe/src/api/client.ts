@@ -7,7 +7,7 @@ import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosError } from 'ax
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // ── Change to your Spring Boot server address ──────────────────────────────
-export const BASE_URL = 'http://192.168.1.100:8080/api';
+export const BASE_URL = 'http://192.168.1.13:8080/api';
 
 const client: AxiosInstance = axios.create({
   baseURL: BASE_URL,

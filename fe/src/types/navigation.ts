@@ -7,17 +7,21 @@ import type { Alert, AlertHistoryEntry } from './alert';
 // ── Auth Stack ─────────────────────────────────────────────────────────────
 export type AuthStackParamList = {
   Login: undefined;
+  Register: undefined;
+  ForgotPassword: undefined;
 };
 
 // ── App (Authenticated) Root Stack ────────────────────────────────────────
 export type RootStackParamList = {
   MainTabs: undefined;
   /** Full-screen danger modal — alert-info-page.png */
-  AlertInfo: { alertId: string };
+  AlertInfo: { alertId: string; alert?: Alert; severity?: string };
   /** Device detail & mute toggle — devices-info-page.png */
   DeviceInfo: { deviceId: string };
   /** Single history entry detail */
   AlertHistoryDetail: { entry: AlertHistoryEntry };
+  /** Provision a new ESP32 hardware node */
+  AddDevice: undefined;
 };
 
 // ── Bottom Tab Navigator ───────────────────────────────────────────────────

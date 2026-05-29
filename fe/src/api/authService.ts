@@ -12,14 +12,18 @@ export const authService = {
   async login(payload: LoginPayload): Promise<AuthResponse> {
     const { data } = await client.post<AuthResponse>(AUTH.LOGIN, payload);
     await AsyncStorage.setItem('access_token', data.accessToken);
-    await AsyncStorage.setItem('refresh_token', data.refreshToken);
+    if (data.refreshToken) {
+      await AsyncStorage.setItem('refresh_token', data.refreshToken);
+    }
     return data;
   },
 
   async register(payload: RegisterPayload): Promise<AuthResponse> {
     const { data } = await client.post<AuthResponse>(AUTH.REGISTER, payload);
     await AsyncStorage.setItem('access_token', data.accessToken);
-    await AsyncStorage.setItem('refresh_token', data.refreshToken);
+    if (data.refreshToken) {
+      await AsyncStorage.setItem('refresh_token', data.refreshToken);
+    }
     return data;
   },
 

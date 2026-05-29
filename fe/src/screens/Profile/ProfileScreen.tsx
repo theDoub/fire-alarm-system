@@ -1,8 +1,3 @@
-/**
- * screens/Profile/ProfileScreen.tsx
- * Mockup: profile-info-page.png
- * Premium UI/UX User Profile screen with dynamic pull-to-refresh telemetry.
- */
 import React, { useState, useCallback } from 'react';
 import {
   View,
@@ -11,16 +6,33 @@ import {
   StyleSheet,
   ScrollView,
   RefreshControl,
-  SafeAreaView,
   StatusBar,
   Alert,
+  Modal,
+  Switch,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/contexts/AuthContext';
-import Icon from 'react-native-vector-icons/Feather';
+import { Feather } from '@expo/vector-icons';
 
 export function ProfileScreen() {
   const { user, logout, refreshProfile } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
+  const insets = useSafeAreaInsets();
+
+  // Modal active states
+  const [activeModal, setActiveModal] = useState<'notifications' | 'security' | 'preferences' | null>(null);
+
+  // 1. Notifications State
+  const [smokeAlerts, setSmokeAlerts] = useState(true);
+  const [disconnectWarnings, setDisconnectWarnings] = useState(true);
+  const [baselineLogs, setBaselineLogs] = useState(false);
+
+  // 2. Security (App Authority / Permissions) State
+  const [cameraPermission, setCameraPermission] = useState(true);
+  const [networkPermission, setNetworkPermission] = useState(true);
+  const [notificationsPermission, setNotificationsPermission] = useState(true);
+  const [storagePermission, setStoragePermission] = useState(false);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -56,320 +68,695 @@ export function ProfileScreen() {
       .substring(0, 2);
   };
 
-  const isSystemAdmin = user?.role?.toUpperCase() === 'ADMIN';
+  const displayName = user?.fullName ?? user?.name ?? 'Secure User';
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor="#0f0f1a" />
+    <View style={[styles.safeArea, { paddingTop: insets.top > 0 ? insets.top : 20 }]}>
+      <StatusBar barStyle="light-content" backgroundColor="#1e1e2d" />
       <ScrollView
-        contentContainerStyle={styles.scrollContainer}
+        contentContainerStyle={[styles.scrollContainer, { paddingBottom: insets.bottom + 24 }]}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#e94560"
-            colors={['#e94560']}
+            tintColor="#ff6b6b"
+            colors={['#ff6b6b']}
             progressBackgroundColor="#16162a"
           />
         }
       >
-        {/* Profile Card Header */}
-        <View style={styles.profileCard}>
-          <View
-            style={[
-              styles.avatarContainer,
-              isSystemAdmin ? styles.avatarAdminBorder : styles.avatarUserBorder,
-            ]}
-          >
-            <Text style={styles.avatarText}>{getInitials(user?.name)}</Text>
+        {/* Figma Header Card with User Info */}
+        <View style={styles.profileHeaderCard}>
+          <View style={styles.avatarContainer}>
+            <Text style={styles.avatarText}>{getInitials(displayName)}</Text>
           </View>
-
-          <Text style={styles.userName}>{user?.name ?? 'Secure User'}</Text>
-          <View
-            style={[
-              styles.roleBadge,
-              isSystemAdmin ? styles.roleBadgeAdmin : styles.roleBadgeUser,
-            ]}
-          >
-            <Icon
-              name={isSystemAdmin ? 'shield' : 'user'}
-              size={12}
-              color={isSystemAdmin ? '#ffc107' : '#4caf50'}
-              style={styles.roleBadgeIcon}
-            />
-            <Text
-              style={[
-                styles.roleBadgeText,
-                isSystemAdmin ? styles.roleBadgeTextAdmin : styles.roleBadgeTextUser,
-              ]}
-            >
-              {user?.role ?? 'USER'}
-            </Text>
-          </View>
+          <Text style={styles.userName}>{displayName}</Text>
+          <Text style={styles.userEmail}>{user?.email ?? 'operator@gmail.com'}</Text>
         </View>
 
-        {/* Structured Profile Metadata List */}
+        {/* Figma Style Details Section - Account Information */}
         <View style={styles.infoSection}>
-          <Text style={styles.sectionHeader}>ACCOUNT TELEMETRY</Text>
-
-          {/* Full Name Cell */}
+          <Text style={styles.sectionHeader}>ACCOUNT INFORMATION</Text>
+          
           <View style={styles.infoCell}>
             <View style={styles.cellIconContainer}>
-              <Icon name="user" size={18} color="#e94560" />
+              <Feather name="mail" size={18} color="#a0aec0" />
             </View>
             <View style={styles.cellContent}>
-              <Text style={styles.cellLabel}>Full Name</Text>
-              <Text style={styles.cellValue}>{user?.name ?? 'Not Available'}</Text>
-            </View>
-          </View>
-
-          {/* Email Cell */}
-          <View style={styles.infoCell}>
-            <View style={styles.cellIconContainer}>
-              <Icon name="mail" size={18} color="#e94560" />
-            </View>
-            <View style={styles.cellContent}>
-              <Text style={styles.cellLabel}>Registered Email</Text>
+              <Text style={styles.cellLabel}>Email</Text>
               <Text style={styles.cellValue}>{user?.email ?? 'Not Available'}</Text>
             </View>
           </View>
 
-          {/* Security Role Cell */}
-          <View style={styles.infoCell}>
-            <View style={styles.cellIconContainer}>
-              <Icon name="shield" size={18} color="#e94560" />
-            </View>
-            <View style={styles.cellContent}>
-              <Text style={styles.cellLabel}>Security Privilege</Text>
-              <Text style={styles.cellValue}>{user?.role ?? 'Standard Operator'}</Text>
-            </View>
-          </View>
-
-          {/* System Health / Status Cell */}
           <View style={[styles.infoCell, styles.infoCellLast]}>
             <View style={styles.cellIconContainer}>
-              <Icon name="activity" size={18} color="#4caf50" />
+              <Feather name="phone" size={18} color="#a0aec0" />
             </View>
             <View style={styles.cellContent}>
-              <Text style={styles.cellLabel}>Connection Status</Text>
-              <View style={styles.statusValueRow}>
-                <Text style={styles.statusTextActive}>ACTIVE SESSION</Text>
-                <View style={styles.statusPulseDot} />
-              </View>
+              <Text style={styles.cellLabel}>Phone</Text>
+              <Text style={styles.cellValue}>+84 901234567</Text>
             </View>
           </View>
         </View>
 
-        {/* Branded Action Logout Button */}
+        {/* Figma Style Details Section - Settings */}
+        <View style={styles.infoSection}>
+          <Text style={styles.sectionHeader}>SETTINGS</Text>
+
+          <TouchableOpacity
+            style={styles.settingActionRow}
+            onPress={() => setActiveModal('notifications')}
+            activeOpacity={0.7}
+          >
+            <View style={styles.settingRowLeft}>
+              <View style={[styles.cellIconContainer, { backgroundColor: '#f3f4f6' }]}>
+                <Feather name="bell" size={18} color="#ef4444" />
+              </View>
+              <Text style={styles.settingLabel}>Notifications</Text>
+            </View>
+            <Feather name="chevron-right" size={18} color="#a0aec0" />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.settingActionRow}
+            onPress={() => setActiveModal('security')}
+            activeOpacity={0.7}
+          >
+            <View style={styles.settingRowLeft}>
+              <View style={[styles.cellIconContainer, { backgroundColor: '#f3f4f6' }]}>
+                <Feather name="shield" size={18} color="#ef4444" />
+              </View>
+              <Text style={styles.settingLabel}>Security</Text>
+            </View>
+            <Feather name="chevron-right" size={18} color="#a0aec0" />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.settingActionRow, styles.settingRowLast]}
+            onPress={() => setActiveModal('preferences')}
+            activeOpacity={0.7}
+          >
+            <View style={styles.settingRowLeft}>
+              <View style={[styles.cellIconContainer, { backgroundColor: '#f3f4f6' }]}>
+                <Feather name="settings" size={18} color="#ef4444" />
+              </View>
+              <Text style={styles.settingLabel}>Preferences</Text>
+            </View>
+            <Feather name="chevron-right" size={18} color="#a0aec0" />
+          </TouchableOpacity>
+        </View>
+
+        {/* Figma Styled Log Out Button */}
         <TouchableOpacity
           style={styles.logoutButton}
           onPress={handleSignOut}
           activeOpacity={0.8}
         >
-          <Icon name="log-out" size={18} color="#e94560" style={styles.logoutIcon} />
-          <Text style={styles.logoutButtonText}>End Active Session</Text>
+          <Feather name="log-out" size={18} color="#ef4444" style={styles.logoutIcon} />
+          <Text style={styles.logoutButtonText}>Log Out</Text>
         </TouchableOpacity>
 
-        {/* Sync Indicator Info */}
-        <Text style={styles.pullToRefreshInfo}>
-          <Icon name="arrow-down" size={10} color="#555577" /> Pull down to fetch fresh account data
-        </Text>
+        <Text style={styles.figmaVersionText}>Smart Fire Alert v1.0.0</Text>
       </ScrollView>
-    </SafeAreaView>
+
+      {/* ── MODAL 1: NOTIFICATIONS ───────────────────────────────────────── */}
+      <Modal
+        visible={activeModal === 'notifications'}
+        animationType="slide"
+        onRequestClose={() => setActiveModal(null)}
+      >
+        <View style={[styles.modalSafeContainer, { paddingTop: insets.top > 0 ? insets.top : 20 }]}>
+          {/* Modal Header */}
+          <View style={styles.modalHeaderBar}>
+            <TouchableOpacity style={styles.modalBackBtn} onPress={() => setActiveModal(null)} activeOpacity={0.7}>
+              <Feather name="chevron-left" size={24} color="#1f2937" />
+            </TouchableOpacity>
+            <Text style={styles.modalHeaderTitle}>Notification Settings</Text>
+            <View style={{ width: 40 }} />
+          </View>
+
+          <ScrollView contentContainerStyle={styles.modalScrollContent} showsVerticalScrollIndicator={false}>
+            <Text style={styles.modalSubtitle}>
+              Configure how and when you receive smart fire alert push notifications on your device.
+            </Text>
+
+            <View style={styles.modalCardContainer}>
+              {/* Smoke Alerts Option */}
+              <View style={styles.switchOptionRow}>
+                <View style={styles.switchOptionLeft}>
+                  <Text style={styles.switchOptionTitle}>Real-time Smoke Alerts</Text>
+                  <Text style={styles.switchOptionDesc}>
+                    Receive instant notifications when smoke density exceeds threshold levels.
+                  </Text>
+                </View>
+                <Switch
+                  value={smokeAlerts}
+                  onValueChange={setSmokeAlerts}
+                  trackColor={{ true: '#22c55e', false: '#d1d5db' }}
+                  thumbColor="#ffffff"
+                />
+              </View>
+
+              {/* Hardware Disconnect Warnings */}
+              <View style={styles.switchOptionRow}>
+                <View style={styles.switchOptionLeft}>
+                  <Text style={styles.switchOptionTitle}>Hardware Disconnect Warnings</Text>
+                  <Text style={styles.switchOptionDesc}>
+                    Get notified immediately when an ESP32 hardware node falls offline.
+                  </Text>
+                </View>
+                <Switch
+                  value={disconnectWarnings}
+                  onValueChange={setDisconnectWarnings}
+                  trackColor={{ true: '#22c55e', false: '#d1d5db' }}
+                  thumbColor="#ffffff"
+                />
+              </View>
+
+              {/* System Baseline Logs */}
+              <View style={[styles.switchOptionRow, { borderBottomWidth: 0, paddingBottom: 0 }]}>
+                <View style={styles.switchOptionLeft}>
+                  <Text style={styles.switchOptionTitle}>System Baseline Logs</Text>
+                  <Text style={styles.switchOptionDesc}>
+                    Receive daily baseline calibration and maintenance check reports.
+                  </Text>
+                </View>
+                <Switch
+                  value={baselineLogs}
+                  onValueChange={setBaselineLogs}
+                  trackColor={{ true: '#22c55e', false: '#d1d5db' }}
+                  thumbColor="#ffffff"
+                />
+              </View>
+            </View>
+          </ScrollView>
+        </View>
+      </Modal>
+
+      {/* ── MODAL 2: SECURITY (PERMISSIONS DASHBOARD) ─────────────────────── */}
+      <Modal
+        visible={activeModal === 'security'}
+        animationType="slide"
+        onRequestClose={() => setActiveModal(null)}
+      >
+        <View style={[styles.modalSafeContainer, { paddingTop: insets.top > 0 ? insets.top : 20 }]}>
+          <View style={styles.modalHeaderBar}>
+            <TouchableOpacity style={styles.modalBackBtn} onPress={() => setActiveModal(null)} activeOpacity={0.7}>
+              <Feather name="chevron-left" size={24} color="#1f2937" />
+            </TouchableOpacity>
+            <Text style={styles.modalHeaderTitle}>Security & Permissions</Text>
+            <View style={{ width: 40 }} />
+          </View>
+
+          <ScrollView contentContainerStyle={styles.modalScrollContent} showsVerticalScrollIndicator={false}>
+            <Text style={styles.modalSubtitle}>
+              Manage critical mobile system permissions required for MQTT communication and ESP32 gateway synchronisation.
+            </Text>
+
+            <View style={styles.modalCardContainer}>
+              {/* Camera Access */}
+              <View style={styles.switchOptionRow}>
+                <View style={styles.switchOptionLeft}>
+                  <View style={styles.permissionTitleRow}>
+                    <Text style={styles.switchOptionTitle}>Camera Access</Text>
+                    <View style={[styles.statusBadgeSim, cameraPermission ? styles.badgeAllowed : styles.badgeDenied]}>
+                      <Text style={[styles.badgeTextSim, cameraPermission ? styles.textAllowed : styles.textDenied]}>
+                        {cameraPermission ? 'Allowed' : 'Denied'}
+                      </Text>
+                    </View>
+                  </View>
+                  <Text style={styles.switchOptionDesc}>
+                    Required for scanning ESP32 hardware node QR codes during setup.
+                  </Text>
+                </View>
+                <Switch
+                  value={cameraPermission}
+                  onValueChange={setCameraPermission}
+                  trackColor={{ true: '#22c55e', false: '#d1d5db' }}
+                  thumbColor="#ffffff"
+                />
+              </View>
+
+              {/* Local Network */}
+              <View style={styles.switchOptionRow}>
+                <View style={styles.switchOptionLeft}>
+                  <View style={styles.permissionTitleRow}>
+                    <Text style={styles.switchOptionTitle}>Local Network Discovery</Text>
+                    <View style={[styles.statusBadgeSim, networkPermission ? styles.badgeAllowed : styles.badgeDenied]}>
+                      <Text style={[styles.badgeTextSim, networkPermission ? styles.textAllowed : styles.textDenied]}>
+                        {networkPermission ? 'Allowed' : 'Denied'}
+                      </Text>
+                    </View>
+                  </View>
+                  <Text style={styles.switchOptionDesc}>
+                    Enables connection to local MQTT gateways and gateway sync.
+                  </Text>
+                </View>
+                <Switch
+                  value={networkPermission}
+                  onValueChange={setNetworkPermission}
+                  trackColor={{ true: '#22c55e', false: '#d1d5db' }}
+                  thumbColor="#ffffff"
+                />
+              </View>
+
+              {/* Notification Center */}
+              <View style={styles.switchOptionRow}>
+                <View style={styles.switchOptionLeft}>
+                  <View style={styles.permissionTitleRow}>
+                    <Text style={styles.switchOptionTitle}>Notification Center</Text>
+                    <View style={[styles.statusBadgeSim, notificationsPermission ? styles.badgeAllowed : styles.badgeDenied]}>
+                      <Text style={[styles.badgeTextSim, notificationsPermission ? styles.textAllowed : styles.textDenied]}>
+                        {notificationsPermission ? 'Allowed' : 'Denied'}
+                      </Text>
+                    </View>
+                  </View>
+                  <Text style={styles.switchOptionDesc}>
+                    Used to send critical fire and smoke warnings to your device.
+                  </Text>
+                </View>
+                <Switch
+                  value={notificationsPermission}
+                  onValueChange={setNotificationsPermission}
+                  trackColor={{ true: '#22c55e', false: '#d1d5db' }}
+                  thumbColor="#ffffff"
+                />
+              </View>
+
+              {/* Storage Access */}
+              <View style={[styles.switchOptionRow, { borderBottomWidth: 0, paddingBottom: 0 }]}>
+                <View style={styles.switchOptionLeft}>
+                  <View style={styles.permissionTitleRow}>
+                    <Text style={styles.switchOptionTitle}>Storage/Folder Access</Text>
+                    <View style={[styles.statusBadgeSim, storagePermission ? styles.badgeAllowed : styles.badgeDenied]}>
+                      <Text style={[styles.badgeTextSim, storagePermission ? styles.textAllowed : styles.textDenied]}>
+                        {storagePermission ? 'Allowed' : 'Denied'}
+                      </Text>
+                    </View>
+                  </View>
+                  <Text style={styles.switchOptionDesc}>
+                    Required to export historical alert logs and telemetry data.
+                  </Text>
+                </View>
+                <Switch
+                  value={storagePermission}
+                  onValueChange={setStoragePermission}
+                  trackColor={{ true: '#22c55e', false: '#d1d5db' }}
+                  thumbColor="#ffffff"
+                />
+              </View>
+            </View>
+          </ScrollView>
+        </View>
+      </Modal>
+
+      {/* ── MODAL 3: PREFERENCES & COMPLIANCE ─────────────────────────────── */}
+      <Modal
+        visible={activeModal === 'preferences'}
+        animationType="slide"
+        onRequestClose={() => setActiveModal(null)}
+      >
+        <View style={[styles.modalSafeContainer, { paddingTop: insets.top > 0 ? insets.top : 20 }]}>
+          <View style={styles.modalHeaderBar}>
+            <TouchableOpacity style={styles.modalBackBtn} onPress={() => setActiveModal(null)} activeOpacity={0.7}>
+              <Feather name="chevron-left" size={24} color="#1f2937" />
+            </TouchableOpacity>
+            <Text style={styles.modalHeaderTitle}>Preferences & Standards</Text>
+            <View style={{ width: 40 }} />
+          </View>
+
+          <ScrollView contentContainerStyle={styles.modalScrollContent} showsVerticalScrollIndicator={false}>
+            <Text style={styles.modalSubtitle}>
+              Vietnamese government legal compliance and smart hardware monitoring dependency guidelines.
+            </Text>
+
+            {/* Compliance Docs Box */}
+            <View style={styles.complianceDocCard}>
+              {/* Badge TCVN */}
+              <View style={styles.tcvnBadge}>
+                <Text style={styles.tcvnBadgeText}>GOVERNMENT STANDARD</Text>
+              </View>
+              
+              <Text style={styles.tcvnTitle}>
+                TCVN 3890:2023 - Phòng cháy chữa cháy - Phương tiện, hệ thống báo cháy cho nhà và công trình
+              </Text>
+
+              <View style={styles.docDivider} />
+
+              {/* Regulatory Sections */}
+              <View style={styles.docSection}>
+                <Text style={styles.docSectionHeader}>1. PHẠM VI BẮT BUỘC TRANG BỊ</Text>
+                <Text style={styles.docBodyText}>
+                  Quy chuẩn quốc gia bắt buộc lắp đặt hệ thống báo cháy tự động đối với các công trình công cộng, cơ sở kinh doanh dịch vụ, chung cư cao tầng từ 5 tầng trở lên hoặc có tổng khối tích từ 5.000 m³ trở lên. Thiết bị cảm biến nhiệt, khói và lửa phải được bố trí phủ kín diện tích mặt sàn.
+                </Text>
+              </View>
+
+              <View style={styles.docSection}>
+                <Text style={styles.docSectionHeader}>2. TẦN SUẤT ĐỒNG BỘ (SYNC INTERVALS)</Text>
+                <Text style={styles.docBodyText}>
+                  Để đảm bảo độ tin cậy và ngăn ngừa rủi ro mất kết nối gateway, tần suất truyền phát và đồng bộ hóa trạng thái phần cứng (telemetry logs) từ thiết bị đầu cuối ESP32 lên hệ thống máy chủ Cloud phải hoạt động liên tục với chu kỳ định kỳ tối đa 30 giây/lần.
+                </Text>
+              </View>
+
+              <View style={[styles.docSection, { marginBottom: 0 }]}>
+                <Text style={styles.docSectionHeader}>3. TIÊU CHUẨN ĐỘ TRỄ TRUYỀN PHÁT (LATENCY LIMIT)</Text>
+                <Text style={styles.docBodyText}>
+                  Độ trễ truyền phát tín hiệu cảnh báo khẩn cấp từ thời điểm cảm biến phát hiện khói/lửa vượt ngưỡng kích hoạt đến lúc truyền thông tin cảnh báo lên máy chủ trung tâm và ứng dụng của vận hành viên không được phép vượt quá 10 giây (tiêu chuẩn độ trễ vàng quốc gia).
+                </Text>
+              </View>
+            </View>
+          </ScrollView>
+        </View>
+      </Modal>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#0f0f1a',
+    backgroundColor: '#f3f4f6',
   },
   scrollContainer: {
     paddingHorizontal: 20,
-    paddingVertical: 24,
-    alignItems: 'center',
+    paddingTop: 16,
   },
-  profileCard: {
-    backgroundColor: '#16162a',
+  profileHeaderCard: {
+    backgroundColor: '#ffffff',
     borderRadius: 24,
     borderWidth: 1,
-    borderColor: '#242445',
-    width: '100%',
+    borderColor: '#e5e7eb',
     paddingVertical: 32,
     alignItems: 'center',
     marginBottom: 24,
-    elevation: 4,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
   avatarContainer: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    backgroundColor: '#1a1a36',
+    width: 84,
+    height: 84,
+    borderRadius: 42,
+    backgroundColor: '#fee2e2',
+    borderWidth: 2,
+    borderColor: '#fca5a5',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
-    borderWidth: 3,
-    shadowColor: '#e94560',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.2,
-    shadowRadius: 10,
-  },
-  avatarAdminBorder: {
-    borderColor: '#ffc107',
-  },
-  avatarUserBorder: {
-    borderColor: '#e94560',
   },
   avatarText: {
-    color: '#ffffff',
-    fontSize: 38,
-    fontWeight: '800',
-    letterSpacing: 0.5,
+    color: '#ef4444',
+    fontSize: 32,
+    fontFamily: 'Inter-ExtraBold',
   },
   userName: {
-    color: '#ffffff',
+    color: '#111827',
     fontSize: 22,
-    fontWeight: '800',
-    marginBottom: 8,
+    fontFamily: 'Inter-ExtraBold',
+    marginBottom: 4,
   },
-  roleBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 20,
-    borderWidth: 1,
-  },
-  roleBadgeAdmin: {
-    backgroundColor: '#ffc10714',
-    borderColor: '#ffc10733',
-  },
-  roleBadgeUser: {
-    backgroundColor: '#4caf5014',
-    borderColor: '#4caf5033',
-  },
-  roleBadgeIcon: {
-    marginRight: 6,
-  },
-  roleBadgeText: {
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 1,
-  },
-  roleBadgeTextAdmin: {
-    color: '#ffc107',
-  },
-  roleBadgeTextUser: {
-    color: '#4caf50',
+  userEmail: {
+    color: '#6b7280',
+    fontSize: 14,
+    fontFamily: 'Inter-Medium',
   },
   infoSection: {
-    backgroundColor: '#16162a',
-    borderRadius: 24,
+    backgroundColor: '#ffffff',
+    borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#242445',
-    width: '100%',
+    borderColor: '#e5e7eb',
     padding: 20,
-    marginBottom: 28,
+    marginBottom: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
   sectionHeader: {
-    color: '#e94560',
-    fontSize: 11,
-    fontWeight: '700',
+    color: '#ef4444',
+    fontSize: 10,
+    fontFamily: 'Inter-ExtraBold',
     letterSpacing: 1.5,
     marginBottom: 16,
-    paddingLeft: 4,
+    paddingLeft: 2,
   },
   infoCell: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 14,
+    paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#242445',
+    borderBottomColor: '#e5e7eb88',
   },
   infoCellLast: {
     borderBottomWidth: 0,
-    paddingBottom: 4,
+    paddingBottom: 0,
   },
   cellIconContainer: {
-    width: 38,
-    height: 38,
+    width: 36,
+    height: 36,
     borderRadius: 10,
-    backgroundColor: '#1f1f3a',
+    backgroundColor: '#f3f4f6',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 16,
+    marginRight: 14,
   },
   cellContent: {
     flex: 1,
   },
   cellLabel: {
-    color: '#8f94a5',
-    fontSize: 12,
-    fontWeight: '500',
+    color: '#6b7280',
+    fontSize: 11,
+    fontFamily: 'Inter-Medium',
     marginBottom: 2,
   },
   cellValue: {
-    color: '#ffffff',
+    color: '#111827',
     fontSize: 15,
-    fontWeight: '600',
+    fontFamily: 'Inter-Bold',
   },
-  statusValueRow: {
+  settingActionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e5e7eb88',
+  },
+  settingRowLast: {
+    borderBottomWidth: 0,
+    paddingBottom: 0,
+  },
+  settingRowLeft: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  statusTextActive: {
-    color: '#4caf50',
+  settingLabel: {
+    color: '#111827',
     fontSize: 14,
-    fontWeight: '700',
-    letterSpacing: 0.5,
-  },
-  statusPulseDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#4caf50',
-    marginLeft: 8,
-    shadowColor: '#4caf50',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 4,
+    fontFamily: 'Inter-Bold',
+    marginLeft: 12,
   },
   logoutButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#1a1a2e',
+    backgroundColor: '#fee2e2',
     borderRadius: 16,
     borderWidth: 1.5,
-    borderColor: '#e94560',
+    borderColor: '#fca5a5',
     width: '100%',
     paddingVertical: 16,
     marginBottom: 20,
-    elevation: 2,
-    shadowColor: '#e94560',
+    shadowColor: '#ef4444',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.05,
     shadowRadius: 4,
   },
   logoutIcon: {
     marginRight: 10,
   },
   logoutButtonText: {
-    color: '#e94560',
-    fontWeight: '700',
+    color: '#ef4444',
+    fontFamily: 'Inter-Bold',
     fontSize: 16,
-    letterSpacing: 0.3,
   },
-  pullToRefreshInfo: {
-    color: '#555577',
+  figmaVersionText: {
+    color: '#9ca3af',
     fontSize: 11,
-    fontWeight: '500',
+    fontFamily: 'Inter-Regular',
     textAlign: 'center',
     marginBottom: 24,
+  },
+
+  // ── MODAL UI SPECIFIC STYLES ───────────────────────────────────────────
+  modalSafeContainer: {
+    flex: 1,
+    backgroundColor: '#f3f4f6',
+  },
+  modalHeaderBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e5e7eb',
+    backgroundColor: '#ffffff',
+  },
+  modalBackBtn: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalHeaderTitle: {
+    color: '#111827',
+    fontSize: 17,
+    fontFamily: 'Inter-ExtraBold',
+  },
+  modalScrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 40,
+  },
+  modalSubtitle: {
+    color: '#6b7280',
+    fontSize: 13,
+    fontFamily: 'Inter-Medium',
+    lineHeight: 18,
+    marginBottom: 20,
+    paddingHorizontal: 4,
+  },
+  modalCardContainer: {
+    backgroundColor: '#ffffff',
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  switchOptionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f3f4f6',
+    gap: 16,
+  },
+  switchOptionLeft: {
+    flex: 1,
+  },
+  switchOptionTitle: {
+    color: '#111827',
+    fontSize: 14,
+    fontFamily: 'Inter-Bold',
+    marginBottom: 4,
+  },
+  switchOptionDesc: {
+    color: '#6b7280',
+    fontSize: 12,
+    fontFamily: 'Inter-Medium',
+    lineHeight: 16,
+  },
+
+  // Sim Permission Dashboard Specifics
+  permissionTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 4,
+  },
+  statusBadgeSim: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  badgeAllowed: {
+    backgroundColor: '#dcfce7',
+    borderColor: '#bbf7d0',
+  },
+  badgeDenied: {
+    backgroundColor: '#fee2e2',
+    borderColor: '#fca5a5',
+  },
+  badgeTextSim: {
+    fontSize: 10,
+    fontFamily: 'Inter-Bold',
+  },
+  textAllowed: {
+    color: '#15803d',
+  },
+  textDenied: {
+    color: '#b91c1c',
+  },
+
+  // Compliance Document Style Specifics
+  complianceDocCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  tcvnBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#fef3c7',
+    borderColor: '#fde68a',
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    marginBottom: 12,
+  },
+  tcvnBadgeText: {
+    fontSize: 9,
+    fontFamily: 'Inter-ExtraBold',
+    color: '#d97706',
+    letterSpacing: 0.5,
+  },
+  tcvnTitle: {
+    color: '#111827',
+    fontSize: 17,
+    fontFamily: 'Inter-ExtraBold',
+    lineHeight: 24,
+    marginBottom: 16,
+  },
+  docDivider: {
+    height: 1.5,
+    backgroundColor: '#f3f4f6',
+    width: '100%',
+    marginBottom: 16,
+  },
+  docSection: {
+    marginBottom: 16,
+  },
+  docSectionHeader: {
+    color: '#ef4444',
+    fontSize: 11,
+    fontFamily: 'Inter-ExtraBold',
+    letterSpacing: 1.2,
+    marginBottom: 6,
+  },
+  docBodyText: {
+    color: '#374151',
+    fontSize: 13,
+    fontFamily: 'Inter-Medium',
+    lineHeight: 20,
+    textAlign: 'justify',
   },
 });

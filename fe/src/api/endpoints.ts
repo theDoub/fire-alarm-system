@@ -30,7 +30,7 @@ export const ALERTS = {
   LIVE: '/alerts',
   DETAIL: (id: string) => `/alerts/${id}`,
   /** Acknowledge a single alert */
-  ACKNOWLEDGE: (id: string) => `/alerts/${id}/acknowledge`,
+  ACKNOWLEDGE: (id: string | number) => `/alerts/${id}/acknowledge`,
 } as const;
 
 // ── AlertHistoryController  /api/alerts/history ───────────────────────────

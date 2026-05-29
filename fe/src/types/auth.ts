@@ -20,10 +20,12 @@ export interface AuthResponse {
 }
 
 export interface UserProfile {
-  id: string;
-  name: string;
+  userId?: string;
+  id?: string;
+  fullName?: string;
+  name?: string;
   email: string;
-  role: 'ADMIN' | 'VIEWER';
+  role: 'ADMIN' | 'VIEWER' | 'USER';
   avatarUrl?: string;
-  createdAt: string;
+  createdAt?: string;
 }

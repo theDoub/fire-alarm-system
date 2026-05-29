@@ -13,6 +13,7 @@ import { AppStack } from './AppStack';
 import { AlertInfoScreen } from '@/screens/AlertInfo/AlertInfoScreen';
 import { DeviceInfoScreen } from '@/screens/DeviceInfo/DeviceInfoScreen';
 import { AlertHistoryDetailScreen } from '@/screens/AlertHistory/AlertHistoryDetailScreen';
+import { AddDeviceScreen } from '@/screens/AddDevice/AddDeviceScreen';
 import type { RootStackParamList } from '@/types/navigation';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 
@@ -35,6 +36,11 @@ export function RootNavigator() {
           />
           <Root.Screen name="DeviceInfo" component={DeviceInfoScreen} />
           <Root.Screen name="AlertHistoryDetail" component={AlertHistoryDetailScreen} />
+          <Root.Screen
+            name="AddDevice"
+            component={AddDeviceScreen}
+            options={{ presentation: 'card', headerShown: false }}
+          />
         </Root.Navigator>
       ) : (
         <AuthStack />

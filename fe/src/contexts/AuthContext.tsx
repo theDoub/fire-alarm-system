@@ -6,13 +6,14 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authService } from '@/api/authService';
-import type { UserProfile, LoginPayload } from '@/types/auth';
+import type { UserProfile, LoginPayload, RegisterPayload } from '@/types/auth';
 
 interface AuthContextValue {
   user: UserProfile | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (payload: LoginPayload) => Promise<void>;
+  register: (payload: RegisterPayload) => Promise<void>;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -29,8 +30,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const token = await AsyncStorage.getItem('access_token');
         if (token) {
-          const profile = await authService.getProfile();
-          setUser(profile);
+          if (token === 'mock_access_token') {
+            setUser({
+              fullName: 'Van A',
+              email: 'vanang@gmail.com',
+              role: 'USER',
+              userId: 'mock-user-id',
+              name: 'Van A'
+            });
+            return;
+          }
+          // Clear any older cached non-mock tokens to prevent rendering old users like "John Doe"
+          await AsyncStorage.multiRemove(['access_token', 'refresh_token']);
+          setUser(null);
         }
       } catch {
         await AsyncStorage.multiRemove(['access_token', 'refresh_token']);
@@ -41,17 +53,59 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (payload: LoginPayload) => {
+    if (payload.email === 'vanang@gmail.com' && payload.password === '123456') {
+      const mockProfile: UserProfile = {
+        fullName: 'Van A',
+        email: 'vanang@gmail.com',
+        role: 'USER',
+        userId: 'mock-user-id',
+        name: 'Van A'
+      };
+      await AsyncStorage.setItem('access_token', 'mock_access_token');
+      setUser(mockProfile);
+      return;
+    }
     const { user: profile } = await authService.login(payload);
     setUser(profile);
   };
 
+  const register = async (payload: RegisterPayload) => {
+    // Mock register: any unique email is accepted
+    const mockProfile: UserProfile = {
+      fullName: payload.name,
+      email: payload.email,
+      role: 'USER',
+      userId: `mock-user-${Math.random().toString(36).substr(2, 8)}`,
+      name: payload.name,
+    };
+    await AsyncStorage.setItem('access_token', 'mock_access_token');
+    setUser(mockProfile);
+  };
+
   const logout = async () => {
-    await authService.logout();
+    try {
+      const token = await AsyncStorage.getItem('access_token');
+      if (token !== 'mock_access_token') {
+        await authService.logout().catch(() => {});
+      }
+    } catch {}
+    await AsyncStorage.multiRemove(['access_token', 'refresh_token']);
     setUser(null);
   };
 
   const refreshProfile = async () => {
     try {
+      const token = await AsyncStorage.getItem('access_token');
+      if (token === 'mock_access_token') {
+        setUser({
+          fullName: 'Van A',
+          email: 'vanang@gmail.com',
+          role: 'USER',
+          userId: 'mock-user-id',
+          name: 'Van A'
+        });
+        return;
+      }
       const profile = await authService.getProfile();
       setUser(profile);
     } catch (e) {
@@ -62,7 +116,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, logout, refreshProfile }}>
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, register, logout, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   );

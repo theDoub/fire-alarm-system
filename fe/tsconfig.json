@@ -26,6 +26,8 @@
     "App.tsx"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "fire-smoke-figma",
+    "fire-alarm-figma"
   ]
 }
