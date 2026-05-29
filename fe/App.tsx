@@ -6,6 +6,7 @@ import { AlertProvider } from '@/contexts/AlertContext';
 import { RootNavigator } from '@/navigation/RootNavigator';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 
+
 export default function App() {
   return (
     <ErrorBoundary>

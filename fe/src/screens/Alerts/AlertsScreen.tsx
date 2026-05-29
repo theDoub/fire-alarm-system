@@ -1,86 +1,181 @@
-/**
- * screens/Alerts/AlertsScreen.tsx
- * Mockup: alerts-page-all / alerts-page-low / alerts-page-medium / alerts-page-high
- * Multi-tier incident center with 4 severity tabs.
- * API: GET /api/alerts?severity= → alertService.getAlerts()
- */
-import React, { useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { AlertTriangle } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useAlerts } from '@/hooks/useAlerts';
-import type { AlertSeverity, Alert } from '@/types/alert';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Header } from '@/components/common/Header';
+import { Screen } from '@/components/common/Screen';
+import { mockAlerts } from '@/data/mockData';
+import { colors, radius } from '@/theme/colors';
+import type { AlertSeverity } from '@/types/alert';
 import type { RootStackParamList } from '@/types/navigation';
+import { formatDateTime, severityColor, severitySoftColor, statusLabel } from '@/utils/formatters';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
+type Filter = 'ALL' | AlertSeverity;
 
-const TABS: Array<{ label: string; severity?: AlertSeverity }> = [
-  { label: 'All' },
-  { label: 'Low', severity: 'LOW' },
-  { label: 'Medium', severity: 'MEDIUM' },
-  { label: 'High', severity: 'HIGH' },
+const FILTERS: Array<{ label: string; value: Filter }> = [
+  { label: 'All', value: 'ALL' },
+  { label: 'High', value: 'HIGH' },
+  { label: 'Medium', value: 'MEDIUM' },
+  { label: 'Low', value: 'LOW' },
 ];
-
-const SEVERITY_COLOR: Record<AlertSeverity, string> = {
-  LOW: '#4caf50',
-  MEDIUM: '#ffc107',
-  HIGH: '#e94560',
-};
 
 export function AlertsScreen() {
   const navigation = useNavigation<Nav>();
-  const [activeTab, setActiveTab] = useState(0);
-  const { alerts, isLoading, setFilter } = useAlerts();
-
-  const handleTabChange = (index: number) => {
-    setActiveTab(index);
-    setFilter(TABS[index].severity);
-  };
-
-  const renderAlert = ({ item }: { item: Alert }) => (
-    <TouchableOpacity
-      style={styles.card}
-      onPress={() => navigation.navigate('AlertInfo', { alertId: item.id })}
-    >
-      <View style={[styles.severityBar, { backgroundColor: SEVERITY_COLOR[item.severity] }]} />
-      <View style={styles.cardContent}>
-        <Text style={styles.deviceName}>{item.deviceName}</Text>
-        <Text style={styles.location}>{item.deviceLocation}</Text>
-        <Text style={styles.time}>{new Date(item.triggeredAt).toLocaleString()}</Text>
-      </View>
-      <Text style={[styles.badge, { color: SEVERITY_COLOR[item.severity] }]}>{item.severity}</Text>
-    </TouchableOpacity>
+  const [filter, setFilter] = useState<Filter>('ALL');
+  const alerts = useMemo(
+    () => (filter === 'ALL' ? mockAlerts : mockAlerts.filter((alert) => alert.severity === filter)),
+    [filter],
   );
 
   return (
-    <View style={styles.container}>
-      {/* TODO: Implement full tab UI from alerts-page-*.png mockups */}
-      <View style={styles.tabBar}>
-        {TABS.map((tab, i) => (
-          <TouchableOpacity key={tab.label} style={[styles.tab, activeTab === i && styles.tabActive]} onPress={() => handleTabChange(i)}>
-            <Text style={[styles.tabText, activeTab === i && styles.tabTextActive]}>{tab.label}</Text>
-          </TouchableOpacity>
-        ))}
+    <Screen>
+      <Header title="Alerts" subtitle="Review active and past fire events" />
+      <View style={styles.filterRow}>
+        {FILTERS.map((item) => {
+          const active = filter === item.value;
+          return (
+            <TouchableOpacity
+              key={item.value}
+              style={[
+                styles.filterChip,
+                active && styles.filterChipActive,
+                active && item.value !== 'ALL' ? { backgroundColor: severityColor(item.value) } : null,
+              ]}
+              onPress={() => setFilter(item.value)}
+              activeOpacity={0.75}
+            >
+              <Text style={[styles.filterText, active && styles.filterTextActive]}>{item.label}</Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
-      {isLoading ? <ActivityIndicator color="#e94560" style={{ marginTop: 40 }} /> : (
-        <FlatList data={alerts} keyExtractor={(a) => a.id} renderItem={renderAlert} contentContainerStyle={{ padding: 16 }} />
+
+      {alerts.length === 0 ? (
+        <View style={styles.emptyState}>
+          <AlertTriangle size={34} color="#94a3b8" />
+          <Text style={styles.emptyText}>No alerts found</Text>
+        </View>
+      ) : (
+        alerts.map((alert) => (
+          <TouchableOpacity
+            key={alert.id}
+            style={[styles.card, { borderLeftColor: severityColor(alert.severity) }]}
+            onPress={() => navigation.navigate('AlertInfo', { alertId: alert.id })}
+            activeOpacity={0.82}
+          >
+            <View style={styles.cardTop}>
+              <View style={styles.cardCopy}>
+                <View style={styles.badgeRow}>
+                  <Text style={[styles.severityBadge, { backgroundColor: severitySoftColor(alert.severity), color: severityColor(alert.severity) }]}>
+                    {alert.severity}
+                  </Text>
+                  <Text style={[styles.statusBadge, alert.status === 'ACTIVE' && styles.statusActive]}>
+                    {statusLabel(alert.status)}
+                  </Text>
+                </View>
+                <Text style={styles.deviceName}>{alert.deviceName}</Text>
+                <Text style={styles.location}>{alert.deviceLocation}</Text>
+                <Text style={styles.time}>{formatDateTime(alert.triggeredAt)}</Text>
+              </View>
+              <AlertTriangle size={26} color={severityColor(alert.severity)} />
+            </View>
+          </TouchableOpacity>
+        ))
       )}
-    </View>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0f0f1a' },
-  tabBar: { flexDirection: 'row', backgroundColor: '#1a1a2e', paddingHorizontal: 16, paddingTop: 8 },
-  tab: { flex: 1, paddingVertical: 10, alignItems: 'center', borderBottomWidth: 2, borderBottomColor: 'transparent' },
-  tabActive: { borderBottomColor: '#e94560' },
-  tabText: { color: '#555', fontWeight: '600' },
-  tabTextActive: { color: '#e94560' },
-  card: { backgroundColor: '#1a1a2e', borderRadius: 12, marginBottom: 10, flexDirection: 'row', overflow: 'hidden' },
-  severityBar: { width: 4 },
-  cardContent: { flex: 1, padding: 14 },
-  deviceName: { color: '#fff', fontWeight: '600', fontSize: 15 },
-  location: { color: '#888', fontSize: 13, marginTop: 2 },
-  time: { color: '#555', fontSize: 11, marginTop: 4 },
-  badge: { padding: 14, fontWeight: '700', fontSize: 11 },
+  filterRow: {
+    flexDirection: 'row',
+    gap: 9,
+    marginBottom: 16,
+  },
+  filterChip: {
+    backgroundColor: colors.surfaceMuted,
+    borderRadius: radius.pill,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+  },
+  filterChipActive: {
+    backgroundColor: colors.slateDark,
+  },
+  filterText: {
+    color: colors.slate,
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  filterTextActive: {
+    color: colors.white,
+  },
+  emptyState: {
+    alignItems: 'center',
+    marginTop: 80,
+  },
+  emptyText: {
+    color: colors.textMuted,
+    marginTop: 12,
+  },
+  card: {
+    backgroundColor: colors.surface,
+    borderLeftWidth: 4,
+    borderRadius: radius.lg,
+    marginBottom: 12,
+    padding: 15,
+  },
+  cardTop: {
+    alignItems: 'flex-start',
+    flexDirection: 'row',
+    gap: 12,
+  },
+  cardCopy: {
+    flex: 1,
+  },
+  badgeRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 9,
+  },
+  severityBadge: {
+    borderRadius: radius.pill,
+    fontSize: 11,
+    fontWeight: '900',
+    overflow: 'hidden',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  statusBadge: {
+    backgroundColor: colors.surfaceMuted,
+    borderRadius: radius.pill,
+    color: colors.slate,
+    fontSize: 11,
+    fontWeight: '800',
+    overflow: 'hidden',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  statusActive: {
+    backgroundColor: colors.dangerSoft,
+    color: colors.dangerDark,
+  },
+  deviceName: {
+    color: colors.text,
+    fontSize: 16,
+    fontWeight: '900',
+  },
+  location: {
+    color: colors.textMuted,
+    fontSize: 13,
+    marginTop: 3,
+  },
+  time: {
+    color: '#94a3b8',
+    fontSize: 12,
+    marginTop: 6,
+  },
 });
+

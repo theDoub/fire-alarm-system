@@ -7,6 +7,7 @@ import type { Alert, AlertHistoryEntry } from './alert';
 // ── Auth Stack ─────────────────────────────────────────────────────────────
 export type AuthStackParamList = {
   Login: undefined;
+  Signup: undefined;
 };
 
 // ── App (Authenticated) Root Stack ────────────────────────────────────────
@@ -23,8 +24,9 @@ export type RootStackParamList = {
 // ── Bottom Tab Navigator ───────────────────────────────────────────────────
 export type MainTabParamList = {
   Home: undefined;
-  Devices: undefined;
   Alerts: undefined;
+  Devices: undefined;
+  History: undefined;
   Profile: undefined;
 };
 

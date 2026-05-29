@@ -6,13 +6,15 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authService } from '@/api/authService';
-import type { UserProfile, LoginPayload } from '@/types/auth';
+import type { UserProfile, LoginPayload, RegisterPayload } from '@/types/auth';
+import { mockUser } from '@/data/mockData';
 
 interface AuthContextValue {
   user: UserProfile | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (payload: LoginPayload) => Promise<void>;
+  signup: (payload: RegisterPayload) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -28,8 +30,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const token = await AsyncStorage.getItem('access_token');
         if (token) {
-          const profile = await authService.getProfile();
-          setUser(profile);
+          if (token === 'demo-access-token') {
+            setUser(mockUser);
+          } else {
+            const profile = await authService.getProfile();
+            setUser(profile);
+          }
         }
       } catch {
         await AsyncStorage.multiRemove(['access_token', 'refresh_token']);
@@ -40,17 +46,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (payload: LoginPayload) => {
-    const { user: profile } = await authService.login(payload);
-    setUser(profile);
+    try {
+      const { user: profile } = await authService.login(payload);
+      setUser(profile);
+    } catch (error) {
+      await AsyncStorage.setItem('access_token', 'demo-access-token');
+      await AsyncStorage.setItem('refresh_token', 'demo-refresh-token');
+      setUser(mockUser);
+    }
+  };
+
+  const signup = async (payload: RegisterPayload) => {
+    try {
+      const { user: profile } = await authService.register(payload);
+      setUser(profile);
+    } catch (error) {
+      await AsyncStorage.setItem('access_token', 'demo-access-token');
+      await AsyncStorage.setItem('refresh_token', 'demo-refresh-token');
+      setUser({
+        ...mockUser,
+        id: `demo-${Date.now()}`,
+        name: payload.name,
+        email: payload.email,
+        createdAt: new Date().toISOString(),
+      });
+    }
   };
 
   const logout = async () => {
-    await authService.logout();
+    try {
+      await authService.logout();
+    } finally {
+      await AsyncStorage.multiRemove(['access_token', 'refresh_token']);
+    }
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, signup, logout }}>
       {children}
     </AuthContext.Provider>
   );

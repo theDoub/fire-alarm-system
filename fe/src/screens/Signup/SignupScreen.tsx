@@ -7,23 +7,34 @@ import { useAuth } from '@/contexts/AuthContext';
 import { colors, radius } from '@/theme/colors';
 import type { AuthStackParamList } from '@/types/navigation';
 
-type Nav = NativeStackNavigationProp<AuthStackParamList, 'Login'>;
+type Nav = NativeStackNavigationProp<AuthStackParamList, 'Signup'>;
 
-export function LoginScreen() {
-  const { login } = useAuth();
+export function SignupScreen() {
   const navigation = useNavigation<Nav>();
-  const [email, setEmail] = useState('vanang@gmail.com');
-  const [password, setPassword] = useState('password');
+  const { signup } = useAuth();
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = async () => {
+  const handleSignup = async () => {
+    if (!name.trim() || !email.trim() || !password) {
+      setError('Please fill in all required fields.');
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
     try {
-      await login({ email, password });
+      await signup({ name: name.trim(), email: email.trim(), password });
     } catch (e: any) {
-      setError(e?.response?.data?.message ?? 'Login failed. Backend can be connected later; demo auth is enabled.');
+      setError(e?.response?.data?.message ?? 'Signup failed.');
     } finally {
       setIsLoading(false);
     }
@@ -34,13 +45,22 @@ export function LoginScreen() {
       <View style={styles.content}>
         <View style={styles.brand}>
           <View style={styles.logo}>
-            <Flame size={48} color={colors.danger} />
+            <Flame size={44} color={colors.danger} />
           </View>
-          <Text style={styles.title}>Smart Fire Alert</Text>
-          <Text style={styles.subtitle}>Stay safe, stay protected</Text>
+          <Text style={styles.title}>Create Account</Text>
+          <Text style={styles.subtitle}>Connect your fire safety dashboard</Text>
         </View>
 
         <View style={styles.card}>
+          <Text style={styles.label}>Name</Text>
+          <TextInput
+            style={styles.input}
+            value={name}
+            onChangeText={setName}
+            placeholder="Van A"
+            placeholderTextColor="#94a3b8"
+          />
+
           <Text style={styles.label}>Email</Text>
           <TextInput
             style={styles.input}
@@ -62,22 +82,26 @@ export function LoginScreen() {
             secureTextEntry
           />
 
+          <Text style={styles.label}>Confirm Password</Text>
+          <TextInput
+            style={styles.input}
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            placeholder="Password again"
+            placeholderTextColor="#94a3b8"
+            secureTextEntry
+          />
+
           {error ? <Text style={styles.error}>{error}</Text> : null}
 
-          <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={isLoading} activeOpacity={0.78}>
-            {isLoading ? <ActivityIndicator color={colors.white} /> : <Text style={styles.buttonText}>Login</Text>}
+          <TouchableOpacity style={styles.button} onPress={handleSignup} disabled={isLoading} activeOpacity={0.78}>
+            {isLoading ? <ActivityIndicator color={colors.white} /> : <Text style={styles.buttonText}>Sign Up</Text>}
           </TouchableOpacity>
 
-          <TouchableOpacity activeOpacity={0.75}>
-            <Text style={styles.forgot}>Forgot password?</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={() => navigation.navigate('Signup')} activeOpacity={0.75}>
-            <Text style={styles.switchText}>New here? Create an account</Text>
+          <TouchableOpacity onPress={() => navigation.navigate('Login')} activeOpacity={0.75}>
+            <Text style={styles.switchText}>Already have an account? Login</Text>
           </TouchableOpacity>
         </View>
-
-        <Text style={styles.emergency}>Emergency? Call 114 immediately</Text>
       </View>
     </KeyboardAvoidingView>
   );
@@ -95,25 +119,25 @@ const styles = StyleSheet.create({
   },
   brand: {
     alignItems: 'center',
-    marginBottom: 30,
+    marginBottom: 24,
   },
   logo: {
     alignItems: 'center',
     backgroundColor: colors.white,
     borderRadius: radius.pill,
-    height: 86,
+    height: 78,
     justifyContent: 'center',
-    marginBottom: 14,
-    width: 86,
+    marginBottom: 12,
+    width: 78,
   },
   title: {
     color: colors.white,
-    fontSize: 30,
+    fontSize: 29,
     fontWeight: '900',
   },
   subtitle: {
     color: '#fee2e2',
-    fontSize: 15,
+    fontSize: 14,
     marginTop: 5,
   },
   card: {
@@ -134,9 +158,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     color: colors.text,
     fontSize: 15,
-    marginBottom: 15,
+    marginBottom: 13,
     paddingHorizontal: 14,
-    paddingVertical: 13,
+    paddingVertical: 12,
   },
   error: {
     color: colors.dangerDark,
@@ -158,24 +182,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '900',
   },
-  forgot: {
-    color: colors.danger,
-    fontSize: 13,
-    fontWeight: '800',
-    marginTop: 18,
-    textAlign: 'center',
-  },
   switchText: {
     color: colors.slate,
     fontSize: 13,
     fontWeight: '800',
-    marginTop: 14,
-    textAlign: 'center',
-  },
-  emergency: {
-    color: '#fee2e2',
-    fontSize: 13,
-    marginTop: 24,
+    marginTop: 16,
     textAlign: 'center',
   },
 });
+
