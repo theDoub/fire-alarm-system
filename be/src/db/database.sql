@@ -95,15 +95,10 @@ CREATE TABLE IF NOT EXISTS alert_history(
 CREATE TABLE IF NOT EXISTS alert_suppressions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     device_id UUID NOT NULL,
-    user_id UUID NOT NULL,
     start_time TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     end_time TIMESTAMPTZ NOT NULL,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_alert_suppression_user
-        FOREIGN KEY (user_id)
-        REFERENCES users(id)
-        ON DELETE CASCADE,
     CONSTRAINT fk_alert_suppression_device
         FOREIGN KEY (device_id)
         REFERENCES devices(id)

@@ -78,6 +78,21 @@ public class DeviceController {
         );
     }
 
+    @PatchMapping("/{deviceId}/status")
+    public ResponseEntity<DeviceResponse> updateDeviceStatus(
+            @AuthenticationPrincipal CustomUserDetails currentUser,
+            @PathVariable UUID deviceId,
+            @RequestParam DeviceStatus status
+    ) {
+        return ResponseEntity.ok(
+                deviceService.updateDeviceStatus(
+                        currentUser.getId(),
+                        deviceId,
+                        status
+                )
+        );
+    }
+
     @DeleteMapping("/{deviceId}")
     public ResponseEntity<Void> deleteDevice(
             @AuthenticationPrincipal CustomUserDetails currentUser,

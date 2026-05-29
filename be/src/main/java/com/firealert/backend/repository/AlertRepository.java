@@ -1,14 +1,12 @@
 package com.firealert.backend.repository;
 
 import com.firealert.backend.model.entities.Alert;
-import com.firealert.backend.model.entities.Device;
 import com.firealert.backend.model.enums.AlertLevel;
 import com.firealert.backend.model.enums.AlertStatus;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.lang.ProcessHandle.Info;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
