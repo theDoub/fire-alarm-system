@@ -26,8 +26,9 @@
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
-    "@types/react": "~18.2.45",
+    "@types/react": "~19.1.10",
     "babel-plugin-module-resolver": "^5.0.2",
+    "babel-preset-expo": "~54.0.10",
     "typescript": "~5.4.5"
   },
   "private": true
